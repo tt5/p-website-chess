@@ -63,14 +63,14 @@ export default function Home() {
   const [cursor, setCursor] = createSignal(["", ""])
   const [squareSize, setSquareSize] = createSignal(16)
   const [startPos, setStartPos] = createSignal([
-    ["r"],["n"],["b"],["q"],["k"],["b"],["n"],["r"],
-    ["p"],["p"],["p"],["p"],["p"],["p"],["p"],["p"],
-    ["e"],["e"],["e"],["e"],["e"],["e"],["e"],["e"],
-    ["e"],["e"],["e"],["e"],["e"],["e"],["e"],["e"],
-    ["e"],["e"],["e"],["e"],["e"],["e"],["e"],["e"],
-    ["e"],["e"],["e"],["e"],["e"],["e"],["e"],["e"],
-    ["P"],["P"],["P"],["P"],["P"],["P"],["P"],["P"],
-    ["R"],["N"],["B"],["Q"],["K"],["B"],["N"],["R"],
+    'r','n','b','q','k','b','n','r',
+    'p','p','p','p','p','p','p','p',
+    'e','e','e','e','e','e','e','e',
+    'e','e','e','e','e','e','e','e',
+    'e','e','e','e','e','e','e','e',
+    'e','e','e','e','e','e','e','e',
+    'P','P','P','P','P','P','P','P',
+    'R','N','B','Q','K','B','N','R',
   ])
   const [currentPos, setCurrentPos] = ([
     ["r"],["n"],["b"],["q"],["k"],["b"],["n"],["r"],
@@ -82,6 +82,12 @@ export default function Home() {
     ["P"],["P"],["P"],["P"],["P"],["P"],["P"],["P"],
     ["R"],["N"],["B"],["Q"],["K"],["B"],["N"],["R"],
   ])
+
+  const [activeSquare, setActiveSquare] = createSignal(["start", false])
+
+  const changeActiveSquare = ([square, clicked]) => {
+    setActiveSquare([square, clicked])
+  }
 
   const [legal, setLegal] = createSignal(Array.from({length: 64}, (_, i) => [i]))
 
@@ -99,7 +105,7 @@ export default function Home() {
   }
 
   const changeCursor = (cursor) => {
-    console.log("cursor")
+    //console.log("cursor")
     setCursor(cursor)
   }
 
@@ -115,6 +121,26 @@ export default function Home() {
   };
 
   //const startingPos = [].concat(... new Array(64).fill(["", bpawn, bnight, brook]))
+
+  var setupPos = [];
+  startPos().map(square => {
+    console.log(square);
+    switch (square) {
+      case 'r':
+        setupPos.push(brook)
+        break;
+      case 'n':
+        setupPos.push(bknight)
+        break;
+      case 'p':
+        setupPos.push(bpawn)
+        break;
+      default:
+        setupPos.push("")
+    }
+  })
+
+
   const  [pos, setPos] = createSignal([
     "", "", "", "", "", "", "", "",
     "", bpawn, "", "", "", "", "", "",
@@ -137,6 +163,8 @@ export default function Home() {
   const black="gray-400"
   const oddrank = [].concat(... new Array(4).fill([white, black]))
   const evenrank = [].concat(... new Array(4).fill([black, white]))
+
+  setPos(setupPos);
 
   return (
   <div class="border" 
@@ -168,6 +196,8 @@ export default function Home() {
                   changeLegal={changeLegal}
                   last={last()}
                   changeLast={changeLast}
+                  activeSquare={activeSquare()}
+                  changeActiveSquare={changeActiveSquare}
                   cursor={cursor()}
                   changeCursor={changeCursor}/>
                 </div>
