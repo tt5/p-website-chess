@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  @apply bg-cyan-200;
+}
+
+body {
+  height: 100vh;
+}
+
+svg {
+}
+
+.svg {
+    display: block;
+    width:100%;
+    height: auto;
+}
+
+.pawn {
+    display:block;
+    position:fixed;
+    overflow:hidden;
+    background-color: gray;
+}
+
+.resizeBoard {
+  resize: horizontal;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.square {
+}
+
+.cursor {
+    pointer-events: none;
+    display:block;
+    position:fixed;
+    overflow:hidden;
+}
