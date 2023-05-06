@@ -33,17 +33,24 @@ export default function Square(props) {
     <div
       ref={setRef}
       class={
-      `bg-${props.color}` +
-      ` border border-2 border-${props.color}` +
-      ` ${border() && "border-yellow-400"}` +
-      ` ${active() && "bg-yellow-400"}`
+      ` border border-2` +
+      ` ${border() ? "!border-yellow-400" : ""}` +
+      ` ${active() ? "!bg-yellow-400" : ""}`
+      }
+      style={
+      `background-color: ${props.color}; ` +
+      `border-color: ${props.color}`
       }
       onMouseDown={() => {
 
         if (props.activeSquare[0] == props.name) {
           //props.changeActiveSquare([props.name, true])
         } else {
-          props.changeActiveSquare([props.name, true])
+          if (props.legal[props.name].includes(props.name)) {
+            props.changeActiveSquare([props.name, true])
+          } else {
+            props.changeActiveSquare([props.name, false])
+          }
         }
         //if piece can move empty square
         props.changeLast(props.name)
@@ -59,14 +66,20 @@ export default function Square(props) {
         } else {
           props.changeActiveSquare(["stop", false])
           if (props.legal[props.last].includes(props.name)) {
-            console.log(props.legal[props.last])
+            //console.log(props.legal[props.last])
             setPiece(() => props.cursor)
             setSquare(props.cursor)
             props.changePos(props.last, "")
             props.changePos(props.name, props.cursor)
+            console.log("move done", props.last, props.name)
+            // TODO
+            // have legal_moves_white and legal_moves_black
+            // moved_piece = get_piece(props.last)
+            // set_field(props.last, empty) and update legal moves
+            // set_field(props.name, moved_piece) and update legal moves
             props.changeLast(props.name)
           } else {
-            console.log("false")
+            console.log("put piece back")
             props.changePos(props.last, props.cursor)
             props.changeLast(props.name)
           }
