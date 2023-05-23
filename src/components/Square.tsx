@@ -6,9 +6,17 @@ export default function Square(props) {
   const [border, setBorder] = createSignal(false)
   const [active, setActive] = createSignal(false)
   const [piece, setPiece] = createSignal(props.piece)
-  setSquare(props.piece)
+  const [legal, setLegal] = createSignal(props.legalWhite)
 
   createEffect(() => {
+    setSquare(props.piece)
+    if (props.turn == "white") {
+      setLegal(props.legalWhite)
+    } else if (props.turn == "black") {
+      setLegal(props.legalBlack)
+    } else if (props.trun == "opponent") {
+      setLegal(Array.from({length: 64}, (_, i) => []))
+    };
     props.last;
     props.activeSquare;
     //console.log("activeSquare", props.activeSquare)
@@ -18,16 +26,11 @@ export default function Square(props) {
       setActive(false)
     }
     setSquare(props.pos[props.name]);
-    if (props.legal[props.last]) {
-      const legal = props.legal[props.last].includes(props.name)
-      if (props.activeSquare[1]) {setBorder(legal)} else {setBorder(false)}
+    if (legal()[props.last]) {
+      const tlegal = legal()[props.last].includes(props.name)
+      if (props.activeSquare[1]) {setBorder(tlegal)} else {setBorder(false)}
     }
   })
-
-  const bpawn = [
-  ["m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 H 34 C 34,31.58 29.59,27.09 26.59,26.03 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z", 
-  "opacity:1; fill:#000000; fill-opacity:1; fill-rule:nonzero; stroke:#000000; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:miter; stroke-miterlimit:4; stroke-dasharray:none; stroke-opacity:1;"]
-  ]
 
   return (
     <div
@@ -46,7 +49,7 @@ export default function Square(props) {
         if (props.activeSquare[0] == props.name) {
           //props.changeActiveSquare([props.name, true])
         } else {
-          if (props.legal[props.name].includes(props.name)) {
+          if (legal()[props.name].includes(props.name)) {
             props.changeActiveSquare([props.name, true])
           } else {
             props.changeActiveSquare([props.name, false])
@@ -65,18 +68,43 @@ export default function Square(props) {
           props.changeLast("same")
         } else {
           props.changeActiveSquare(["stop", false])
-          if (props.legal[props.last].includes(props.name)) {
+          if (legal()[props.last].includes(props.name)) {
             //console.log(props.legal[props.last])
             setPiece(() => props.cursor)
             setSquare(props.cursor)
             props.changePos(props.last, "")
             props.changePos(props.name, props.cursor)
-            console.log("move done", props.last, props.name)
-            // TODO
-            // have legal_moves_white and legal_moves_black
-            // moved_piece = get_piece(props.last)
-            // set_field(props.last, empty) and update legal moves
-            // set_field(props.name, moved_piece) and update legal moves
+            var movedPiece = props.currentPos[props.last]
+            console.log("move done", props.last, props.name,  movedPiece)
+            const changeLegal = (index, moves) => {
+              if (props.turn == "white") {
+                props.changeLegalWhite(index, moves)
+              } else if (props.turn == "black") {
+                props.changeLegalBlack(index, moves)
+              }
+            }
+
+            //now empty field has no legal moves
+            changeLegal(props.last, [])
+            console.log("last x", (props.last % 8)+1)
+            console.log("last y",
+              (((props.last+1)-((props.last+1) % 8))/8)+1
+            )
+
+            //TODO legal moves
+
+            // update empty square
+            
+            // update new piece position
+
+
+            props.changeCurrentPos(props.last, props.name)
+
+            if (props.turn == "white") {
+              props.changeTurn("black")
+            } else if (props.turn == "black") {
+              props.changeTurn("white")
+            }
             props.changeLast(props.name)
           } else {
             console.log("put piece back")
