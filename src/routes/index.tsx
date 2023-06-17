@@ -68,7 +68,7 @@ export default function Home() {
   }
 
   (() => changeLegalBlack(1, [1, 1+2*8-1, 1+2*8+1]))();
-  (() => changeLegalBlack(4, [4, 4+2*8-1, 4+2*8+1]))();
+  (() => changeLegalBlack(6, [6, 6+2*8-1, 6+2*8+1]))();
   for (var i = 0; i < 8; i++) {
     (() => changeLegalBlack(8+i, [8+i, (8+i + 8), (8+i + 2*8)]))();
   }

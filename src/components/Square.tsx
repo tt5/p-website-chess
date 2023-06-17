@@ -86,19 +86,194 @@ export default function Square(props) {
 
             //now empty field has no legal moves
             changeLegal(props.last, [])
-            console.log("last x", (props.last % 8)+1)
-            console.log("last y",
-              (((props.last+1)-((props.last+1) % 8))/8)+1
-            )
 
-            //TODO legal moves
+            const hulp = (a) => {
+              if ( ((a+1) % 8) == 0 ){
+                return 8
+              }
+              return (a+1) % 8
+            }
 
-            // update empty square
-            
-            // update new piece position
+            var from = props.last
+            var fromx = (props.last % 8)+1
+            var fromy = (((props.last+1)-hulp(props.last))/8)+1
+            console.log("fromy: ",fromy, (props.last+1)%8)
 
+            var to = props.name
+            var tox = (props.name % 8)+1
+            var toy = (((props.name+1)-hulp(props.name))/8)+1
+
+            //get knight squares
+            var nfrom = [
+              ((fromx+2) < 9) && ((fromy-1) > 0) && from + 2 - 8,
+              ((fromx+1) < 9) && ((fromy-2) > 0) && from + 1 - 16,
+              ((fromx-1) > 0) && ((fromy-2) > 0) && from - 1 - 16,
+              ((fromx-2) > 0) && ((fromy-1) > 0) && from - 2 - 8,
+              ((fromx-2) > 0) && ((fromy+1) < 9) && from - 2 + 8,
+              ((fromx-1) > 0) && ((fromy+2) < 9) && from - 1 + 16,
+              ((fromx+1) < 9) && ((fromy+2) < 9) && from + 1 + 16,
+              ((fromx+2) < 9) && ((fromy+1) < 9) && from + 2 + 8,
+            ]
+
+            //empty square is now a legal move for knight of same color
+            nfrom.map((square) => {
+              if (square) {
+                var piece = props.currentPos[square]
+                if (props.turn == "white") {
+                  if (piece == 'N') {
+                    props.changeLegalWhite(square, [...props.legalWhite[square], from])
+                  }
+                } else if (props.turn == "black") {
+                  if (piece == 'n') {
+                    props.changeLegalBlack(square, [...props.legalBlack[square], from])
+                  }
+                }
+                console.log(square, props.currentPos[square])
+              }
+            })
+            //TODO
+            //find knight of player color and update legal moves
+
+            //get rook squares
+            var rfrom1 = []
+            for (var i=fromx+1; i<9; i++) {
+              rfrom1.push(from-fromx+i)
+            }
+            var rfrom2 = []
+            for (var i=1; i<fromy; i++) {
+              rfrom2.push(fromx-1 + 8*(i-1))
+            }
+            var rfrom3 = []
+            for (var i=1; i<fromx; i++) {
+              rfrom3.push(from-fromx+i)
+            }
+            var rfrom4 = []
+            for (var i=fromy+1; i<9; i++) {
+              rfrom4.push(fromx-1 + 8*(i-1))
+            }
+
+//console.log(rfrom1, rfrom2, rfrom3,rfrom4, fromx, fromy, tox, toy)
+            if (
+              props.currentPos[rfrom4[0]] == 'k') {
+              if (props.turn == "white") {
+                console.log("move away from black king")
+              } else if (props.trun == "black") {
+                console.log("move towards black king")
+              }
+            } else if (
+              props.currentPos[rfrom4[0]] == 'K'
+            ) {
+              if (props.turn == "white") {
+                console.log("move away from white king")
+              } else if (props.trun == "black") {
+                console.log("move towards white king")
+              }
+            } else {
+              for (const ss of rfrom4){
+                //const piece = props.currentPos[ss]
+                if (ss.length !== 0) {
+                  console.log(rfrom4, ss)
+                  if (props.currentPos[ss] == 'e') {
+                    continue;
+                  }
+                  if (
+                    props.currentPos[ss] == 'R' ||
+                    props.currentPos[ss] == 'Q') {
+                    if (props.turn == "white") {
+                      if (fromx == tox && toy < fromy) {
+                        //move away from R or Q
+                        props.changeLegalWhite(ss, [
+                          ss,
+                          ...Array.from({ length: (fromy - toy) },
+                            (v, i) => ((fromy - 1 - i)*8+fromx-1)),
+                          ...props.legalWhite[ss]
+                        ]);
+                      } else {
+                      }
+                    }
+                  }              
+                }
+              }
+            }
+
+            if (props.turn == "white") {
+              switch(movedPiece) {
+                case 'P':
+                  if (toy > 1) {
+                    var newlegal = []
+                    var islegal = false
+                    if (props.currentPos[to-8]=='e') {
+                      props.changeLegalWhite(to, [to-8])
+                      newlegal.push(to-8)
+                      islegal = true
+                    }
+                    var leftright = []
+                    if ( tox > 1) { leftright.push(9) }
+                    if ( tox < 8) { leftright.push(7) }
+                    for (const lr of leftright) {
+                      if (
+                        (props.currentPos[to-lr]=='p') ||
+                        (props.currentPos[to-lr]=='r') ||
+                        (props.currentPos[to-lr]=='n') ||
+                        (props.currentPos[to-lr]=='b') ||
+                        (props.currentPos[to-lr]=='q') ||
+                        (props.currentPos[to-lr]=='k')
+                        ) {
+                        newlegal.push(to-lr)
+                        islegal = true
+                      }
+                    }
+                    console.log("newlegal1 ",newlegal)
+                    islegal && props.changeLegalWhite(to, [to, ...newlegal])
+                  }
+                  // check square up left, up, up right
+                  break;
+              }
+            } else if (props.turn == "black") {
+              console.log("black turn")
+              switch(movedPiece) {
+                case 'p':
+                  console.log("pawn move")
+                  // check square down left, down, down right
+                  if (toy < 8) {
+                    console.log("no promotion")
+                    var newlegal = []
+                    var islegal = false
+                    if (props.currentPos[to+8]=='e') {
+                      console.log("can move one forward")
+                      props.changeLegalWhite(to, [to+8])
+                      newlegal.push(to+8)
+                      islegal = true
+                    }
+                    var leftright = []
+                    if ( tox > 1) { leftright.push(9) }
+                    if ( tox < 8) { leftright.push(7) }
+                    for (const lr of leftright) {
+                      if (
+                        (props.currentPos[to+lr]=='P') ||
+                        (props.currentPos[to+lr]=='R') ||
+                        (props.currentPos[to+lr]=='N') ||
+                        (props.currentPos[to+lr]=='B') ||
+                        (props.currentPos[to+lr]=='Q') ||
+                        (props.currentPos[to+lr]=='K')
+                        ) {
+                        console.log("can capture", lr)
+                        newlegal.push(to+lr)
+                        islegal = true
+                      }
+                    }
+                    islegal && props.changeLegalBlack(to, [to, ...newlegal])
+                  }
+                  // check square up left, up, up right
+                  break;
+              }
+            }
+
+            // TODO:
+            // update moved to square
 
             props.changeCurrentPos(props.last, props.name)
+            console.log(props.currentPos)
 
             if (props.turn == "white") {
               props.changeTurn("black")
