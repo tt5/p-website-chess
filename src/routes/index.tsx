@@ -79,7 +79,7 @@ export default function Home() {
   for (var i = 0; i < 8; i++) {
     (() => changeLegalWhite(48+i, [48+i, (48+i - 8), (48+i - 2*8)]))();
   }
-  (() => changeLegalWhite(47, [55, 47]))();
+  //(() => changeLegalWhite(47, [55, 47]))();
 
   const changeSquareSize = (size) => {
     setSquareSize(size)

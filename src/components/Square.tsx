@@ -63,7 +63,7 @@ export default function Square(props) {
         //setPiece("")
       }}
       onMouseUp={() => {
-        console.log(props.last)
+        console.log("last",props.last)
         if (props.last == props.name) {
           props.changeLast("same")
         } else {
@@ -97,7 +97,7 @@ export default function Square(props) {
             var from = props.last
             var fromx = (props.last % 8)+1
             var fromy = (((props.last+1)-hulp(props.last))/8)+1
-            console.log("fromy: ",fromy, (props.last+1)%8)
+            //console.log("fromy: ",fromy, (props.last+1)%8)
 
             var to = props.name
             var tox = (props.name % 8)+1
@@ -195,6 +195,18 @@ export default function Square(props) {
                 }
               }
             }
+            var thiscolorstones = []
+            var othercolorstones = []
+            if (props.turn == "white") {
+              thiscolorstones = ['P','R','N','B','Q','K']
+              othercolorstones = ['p','r','n','b','q','k']
+            } else if (props.turn == "black") {
+              thiscolorstones = ['p','r','n','b','q','k']
+              othercolorstones = ['P','R','N','B','Q','K']
+
+            }
+
+
 
             if (props.turn == "white") {
               switch(movedPiece) {
@@ -212,13 +224,8 @@ export default function Square(props) {
                     if ( tox < 8) { leftright.push(7) }
                     for (const lr of leftright) {
                       if (
-                        (props.currentPos[to-lr]=='p') ||
-                        (props.currentPos[to-lr]=='r') ||
-                        (props.currentPos[to-lr]=='n') ||
-                        (props.currentPos[to-lr]=='b') ||
-                        (props.currentPos[to-lr]=='q') ||
-                        (props.currentPos[to-lr]=='k')
-                        ) {
+                        (othercolorstones.includes(props.currentPos[to-lr])
+                        )) {
                         newlegal.push(to-lr)
                         islegal = true
                       }
@@ -250,12 +257,7 @@ export default function Square(props) {
                     if ( tox < 8) { leftright.push(7) }
                     for (const lr of leftright) {
                       if (
-                        (props.currentPos[to+lr]=='P') ||
-                        (props.currentPos[to+lr]=='R') ||
-                        (props.currentPos[to+lr]=='N') ||
-                        (props.currentPos[to+lr]=='B') ||
-                        (props.currentPos[to+lr]=='Q') ||
-                        (props.currentPos[to+lr]=='K')
+                        othercolorstones.includes(props.currentPos[to+lr])
                         ) {
                         console.log("can capture", lr)
                         newlegal.push(to+lr)
@@ -269,11 +271,97 @@ export default function Square(props) {
               }
             }
 
+            //get bishop squares
+            var i1, i2, i3, i4 = 0
+            if ((9-fromx) <= fromy) {
+              i1 = 8-fromx
+            } else {
+              i1 = fromy-1
+            }
+            if (fromx <= fromy) {
+              i2 = fromx-1
+            } else {
+              i2 = fromy-1
+            }
+            if (fromx <= (9-fromy)) {
+              i3 = fromx-1
+            } else {
+              i3 = 8-fromy
+            }
+            if ((9-fromx) <= (9-fromy)) {
+              i4 = 8-fromx
+            } else {
+              i4 = 8-fromy
+            }
+            var bfrom1 = []
+            for (var ii=1; ii<=i1; ii++) {
+              bfrom1.push(from-(ii*8)+ii)
+            }
+            var bfrom2 = []
+            for (var ii=1; ii<=i2; ii++) {
+              bfrom2.push(from-(ii*8)-ii)
+            }
+            var bfrom3 = []
+            for (var ii=1; ii<=i3; ii++) {
+              bfrom3.push(from+(ii*8)-ii)
+            }
+            var bfrom4 = []
+            for (var ii=1; ii<=i4; ii++) {
+              bfrom4.push(from+(ii*8)+ii)
+            }
+            //console.log("bfrom", bfrom1, bfrom2, bfrom3, bfrom4)
+
+            //get piece on bishop squares
+            if (props.turn == "white") {
+              switch(movedPiece) {
+                case 'P':
+                  var newsquares = []
+                  var first = true
+                  var lines = [[bfrom1, bfrom3], [bfrom2, bfrom4], [bfrom3, bfrom1], [bfrom4, bfrom2]]
+                  for (var s of lines) {
+                    for (var ss of  s[0]) {
+                      if (first) {newsquares = [...s[1].reverse() , from]}
+                      first = false
+                      // search first quadrant for bishop
+                      if (props.currentPos[ss] == 'e') {
+                        newsquares.push(ss)
+                        continue;
+                      }
+                      if (['B','Q'].includes(props.currentPos[ss])) {
+                        var newlegalmoves = []
+                        var newsquaresminus = newsquares.reverse().slice(1)
+                        console.log("newsquares",newsquaresminus)
+                        for (var testlegal of newsquaresminus) {
+                        console.log("testlegal", testlegal)
+                          if (props.currentPos[testlegal] == 'e') {
+                            newlegalmoves.push(testlegal)
+                          } else if (othercolorstones.includes(props.currentPos[testlegal])) {
+
+                            newlegalmoves.push(testlegal)
+                            break;
+                          }
+                        }
+                        newlegalmoves.push(from)
+                        if (props.legalWhite[ss].includes(ss)) {
+
+                        props.changeLegalWhite(ss, [...props.legalWhite[ss], ...newlegalmoves])
+                        } else {
+                        props.changeLegalWhite(ss, [...props.legalWhite[ss], ...newlegalmoves, ss])
+                        }
+                      }
+                      break;
+                    }
+                    first = true
+                  }
+                  break;
+                }
+            }
+
             // TODO:
             // update moved to square
 
             props.changeCurrentPos(props.last, props.name)
-            console.log(props.currentPos)
+            //console.log(props.currentPos)
 
             if (props.turn == "white") {
               props.changeTurn("black")
