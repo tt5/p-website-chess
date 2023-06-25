@@ -60,11 +60,22 @@ export default function Square(props) {
         setSquare("")
         props.size(ref().offsetWidth)
         props.changeCursor(props.pos[props.name])
+        props.changePos(props.last, "")
+        var m = props.currentPos[props.last]
+        console.log("moved piece", m)
+        props.changeMovedPiece(m)
+        console.log("moved piece after", props.movedPiece)
+        props.changeOneCurrentPos('e', props.last)
         //setPiece("")
       }}
       onMouseUp={() => {
         console.log("last",props.last)
+        console.log("moved piece mouse up",props.movedPiece)
         if (props.last == props.name) {
+          console.log("same")
+          props.changePos(props.last, props.cursor)
+          props.changeOneCurrentPos(props.movedPiece, props.last)
+        //setPiece("")
           props.changeLast("same")
         } else {
           props.changeActiveSquare(["stop", false])
@@ -72,10 +83,17 @@ export default function Square(props) {
             //console.log(props.legal[props.last])
             setPiece(() => props.cursor)
             setSquare(props.cursor)
-            props.changePos(props.last, "")
             props.changePos(props.name, props.cursor)
-            var movedPiece = props.currentPos[props.last]
-            console.log("move done", props.last, props.name,  movedPiece)
+            props.changeOneCurrentPos(props.movedPiece, props.name)
+            console.log(props.currentPos.slice(0,8))
+            console.log(props.currentPos.slice(8, 2*8))
+            console.log(props.currentPos.slice(2*8, 3*8))
+            console.log(props.currentPos.slice(3*8, 4*8))
+            console.log(props.currentPos.slice(4*8, 5*8))
+            console.log(props.currentPos.slice(5*8, 6*8))
+            console.log(props.currentPos.slice(6*8, 7*8))
+            console.log(props.currentPos.slice(7*8, 8*8))
+            console.log("move done", props.last, props.name,  props.movedPiece)
             const changeLegal = (index, moves) => {
               if (props.turn == "white") {
                 props.changeLegalWhite(index, moves)
@@ -209,7 +227,7 @@ export default function Square(props) {
 
 
             if (props.turn == "white") {
-              switch(movedPiece) {
+              switch(props.movedPiece) {
                 case 'P':
                   if (toy > 1) {
                     var newlegal = []
@@ -238,7 +256,7 @@ export default function Square(props) {
               }
             } else if (props.turn == "black") {
               console.log("black turn")
-              switch(movedPiece) {
+              switch(props.movedPiece) {
                 case 'p':
                   console.log("pawn move")
                   // check square down left, down, down right
@@ -313,7 +331,7 @@ export default function Square(props) {
 
             //get piece on bishop squares
             if (props.turn == "white") {
-              switch(movedPiece) {
+              switch(props.movedPiece) {
                 case 'P':
                   var newsquares = []
                   var first = true
@@ -357,10 +375,78 @@ export default function Square(props) {
                 }
             }
 
+            //get rook squares
+            var rto1 = []
+            for (var i=tox+1; i<9; i++) {
+              rto1.push(to-tox+i)
+            }
+            var rto2 = []
+            for (var i=1; i<toy; i++) {
+              rto2.push(tox-1 + 8*(i-1))
+            }
+            var rto3 = []
+            for (var i=1; i<tox; i++) {
+              rto3.push(to-tox+i)
+            }
+            var rto4 = []
+            for (var i=toy+1; i<9; i++) {
+              rto4.push(tox-1 + 8*(i-1))
+            }
+
+            //console.log("rook squares", rto1, rto2, rto3, rto4, tox, toy)
+
             // TODO:
             // update moved to square
 
-            props.changeCurrentPos(props.last, props.name)
+            function compareNumbers(a, b) {
+              return a - b;
+            }
+            if (props.turn == "white") {
+              props.changeLegalWhite(to, [to])
+              switch(props.movedPiece) {
+                case 'R':
+                  console.log("rook move")
+                  for (var r of [rto1, rto2.sort(compareNumbers).reverse(), rto3.sort(compareNumbers).reverse(), rto4]) {
+                    for (var s of r) {
+                      if (props.currentPos[s] == 'e') {
+                        props.changeLegalWhite(to, [...props.legalWhite[to], s])
+                        continue;
+                      }
+                      if (othercolorstones.includes(props.currentPos[s])) {
+                        props.changeLegalWhite(to, [...props.legalWhite[to], s])
+                        break;
+                      } else {
+                        break;
+                      }
+                      console.log("rook", r, s, props.currentPos[s])
+                    }
+                  }
+                  break;
+              }
+            }
+
+
+            //moved to square -> blocking
+            if (props.turn == "white") {
+              var r = []
+              r = rto1
+              for (var s of r) {
+                if (props.currentPos[s] == 'e') {
+                  continue;
+                }
+                if (
+                  (props.currentPos[s] == 'R') ||
+                  (props.currentPos[s] == 'Q')
+                  ) {
+                  //console.log(rto3, s)
+                  props.changeLegalWhite(s, [...props.legalWhite[s]].filter(i => ![...rto3, to].includes(i)))
+                }
+              }
+                  //get bishop squares
+                  //get knight squares
+            }
+
+            //props.changeOneCurrentPos(props.last, props.name)
             //console.log(props.currentPos)
 
             if (props.turn == "white") {

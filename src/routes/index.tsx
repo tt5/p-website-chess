@@ -10,6 +10,7 @@ export default function Home() {
   const [last, setLast] = createSignal(64)
   const [cursorPos, setCursorPos] = createSignal({x: 0, y:0})
   const [cursor, setCursor] = createSignal(["", ""])
+  const [movedPiece, setMovedPiece] = createSignal("")
   const [squareSize, setSquareSize] = createSignal(16)
   const [startPos, setStartPos] = createSignal([
     'r','n','b','q','k','b','n','r',
@@ -36,6 +37,12 @@ export default function Home() {
     var temp = currentPos()
     var piece = temp[from]
     temp[from] = 'e'
+    temp[to] = piece
+    setCurrentPos(temp)
+  }
+
+  const changeOneCurrentPos = (piece: string, to: number) => {
+    var temp = currentPos()
     temp[to] = piece
     setCurrentPos(temp)
   }
@@ -88,6 +95,11 @@ export default function Home() {
   const changeCursor = (cursor) => {
     //console.log("cursor")
     setCursor(cursor)
+  }
+
+  const changeMovedPiece = (movedPiece) => {
+    //console.log("cursor")
+    setMovedPiece(movedPiece)
   }
 
   const changeLast = (a) => {
@@ -150,9 +162,9 @@ export default function Home() {
 
   const  [pos, setPos] = createSignal([
     "", "", "", "", "", "", "", "",
-    "", bpawn, "", "", "", "", "", "",
     "", "", "", "", "", "", "", "",
-    "", bpawn, "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "",
@@ -174,6 +186,7 @@ export default function Home() {
   setPos(setupPos);
 
   return (
+  <>
   <div class="border" 
         onMouseMove={handleMouseMove} 
         onMouseUp={() => {changeLast("out"); changeCursor(["", ""])}}
@@ -211,7 +224,10 @@ export default function Home() {
                   changeTurn={changeTurn}
                   currentPos={currentPos()}
                   changeCurrentPos={changeCurrentPos}
+                  changeOneCurrentPos={changeOneCurrentPos}
                   cursor={cursor()}
+                  movedPiece={movedPiece()}
+                  changeMovedPiece={changeMovedPiece}
                   changeCursor={changeCursor}/>
                 </div>
               }
@@ -231,5 +247,6 @@ export default function Home() {
       </div>
     </div>
   </div>
+  </>
   );
 }
